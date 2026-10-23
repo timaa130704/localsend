@@ -8,6 +8,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
+import android.net.wifi.WifiManager
+import android.net.wifi.WifiNetworkSpecifier
+import android.net.Network
+import android.net.NetworkRequest
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Handler
+import android.os.Looper
 import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
@@ -21,6 +29,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import java.net.NetworkInterface
 
 
 private const val CHANNEL = "org.linkisend.linkisend_app/localsend"
@@ -36,6 +45,8 @@ private const val API_LEVEL_ANDROID_17 = 37
 class MainActivity : FlutterActivity() {
     private var pendingResult: MethodChannel.Result? = null
     private var pendingPermissionResult: MethodChannel.Result? = null
+    private var hotspotReservation: WifiManager.LocalOnlyHotspotReservation? = null
+    private var wifiNetworkCallback: ConnectivityManager.NetworkCallback? = null
 
     /// share_handler drops share intents arriving via onNewIntent while the Dart side
     /// is not subscribed to its media stream yet, which happens when this singleTask
@@ -136,9 +147,165 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
+                "startLocalHotspot" -> startLocalHotspot(result)
+                "getNearbyHotspots" -> getNearbyHotspots(result)
+                "stopLocalHotspot" -> {
+                    hotspotReservation?.close()
+                    hotspotReservation = null
+                    result.success(null)
+                }
+                "connectToHotspot" -> connectToHotspot(call, result)
+                "disconnectFromHotspot" -> {
+                    val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                    wifiNetworkCallback?.let { manager.unregisterNetworkCallback(it) }
+                    wifiNetworkCallback = null
+                    manager.bindProcessToNetwork(null)
+                    result.success(null)
+                }
+
                 else -> result.notImplemented()
             }
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startLocalHotspot(result: MethodChannel.Result) {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val callback = object : WifiManager.LocalOnlyHotspotCallback() {
+            override fun onStarted(reservation: WifiManager.LocalOnlyHotspotReservation) {
+                hotspotReservation = reservation
+                val config = reservation.softApConfiguration
+                val handler = Handler(Looper.getMainLooper())
+                val deadline = android.os.SystemClock.elapsedRealtime() + 5_000
+                val resolveAddress = object : Runnable {
+                    override fun run() {
+                        val ip = findHotspotIpv4()
+                        if (ip == null && android.os.SystemClock.elapsedRealtime() < deadline) {
+                            handler.postDelayed(this, 250)
+                            return
+                        }
+                        result.success(mapOf(
+                            "ssid" to config.ssid,
+                            "password" to config.passphrase,
+                            "ip" to (ip ?: "192.168.43.1"),
+                        ))
+                    }
+                }
+                handler.post(resolveAddress)
+            }
+
+            override fun onFailed(reason: Int) {
+                runOnUiThread { result.error("HOTSPOT_FAILED", "Android could not start a local hotspot (reason $reason)", null) }
+            }
+        }
+
+        wifiManager.startLocalOnlyHotspot(callback, Handler(Looper.getMainLooper()))
+    }
+
+    private fun findHotspotIpv4(): String? = try {
+        NetworkInterface.getNetworkInterfaces().toList()
+            .filter { it.isUp && !it.isLoopback }
+            .sortedBy { if (it.name.startsWith("wlan1") || it.name.startsWith("ap")) 0 else 1 }
+            .filter { it.name.startsWith("wlan1") || it.name.startsWith("ap") }
+            .flatMap { it.inetAddresses.toList() }
+            .filterIsInstance<java.net.Inet4Address>()
+            .firstOrNull { it.isSiteLocalAddress }
+            ?.hostAddress
+    } catch (_: Exception) {
+        null
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getNearbyHotspots(result: MethodChannel.Result) {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        if (!wifiManager.isWifiEnabled) {
+            result.error("WIFI_DISABLED", "Включи Wi-Fi на телефоне-отправителе и повтори поиск.", null)
+            return
+        }
+
+        fun readMatches(): List<String> = try {
+            wifiManager.scanResults
+                .map { it.SSID.trim() }
+                .filter { it.startsWith("LinkiSend_", ignoreCase = true) || it.startsWith("AndroidShare_", ignoreCase = true) }
+                .distinct()
+        } catch (_: SecurityException) {
+            emptyList()
+        }
+
+        val context = applicationContext
+        val handler = Handler(Looper.getMainLooper())
+        var completed = false
+        lateinit var receiver: android.content.BroadcastReceiver
+        fun finish(matches: List<String>) {
+            if (completed) return
+            completed = true
+            handler.removeCallbacksAndMessages(null)
+            try {
+                context.unregisterReceiver(receiver)
+            } catch (_: IllegalArgumentException) {
+                // The timeout and scan broadcast can race to finish.
+            }
+            result.success(matches)
+        }
+        receiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                finish(readMatches())
+            }
+        }
+        val filter = android.content.IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+        if (Build.VERSION.SDK_INT >= 33) {
+            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("DEPRECATION")
+            context.registerReceiver(receiver, filter)
+        }
+
+        // Some Android builds throttle scans without delivering a fresh result.
+        // In that case return the most recent cache after a bounded wait.
+        handler.postDelayed({ finish(readMatches()) }, 4_000)
+        try {
+            if (!wifiManager.startScan()) {
+                handler.postDelayed({ finish(readMatches()) }, 1_000)
+            }
+        } catch (_: SecurityException) {
+            finish(readMatches())
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun connectToHotspot(call: MethodCall, result: MethodChannel.Result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            result.error("UNSUPPORTED", "QR hotspot joining requires Android 10 or newer", null)
+            return
+        }
+        val ssid = call.argument<String>("ssid") ?: return result.error("INVALID_QR", "Missing Wi-Fi name", null)
+        val password = call.argument<String>("password") ?: return result.error("INVALID_QR", "Missing Wi-Fi password", null)
+        val specifier = WifiNetworkSpecifier.Builder().setSsid(ssid).setWpa2Passphrase(password).build()
+        val request = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .setNetworkSpecifier(specifier)
+            .build()
+        val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        wifiNetworkCallback?.let { manager.unregisterNetworkCallback(it) }
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                manager.bindProcessToNetwork(network)
+                val props = manager.getLinkProperties(network)
+                val gateway = props?.routes
+                    ?.firstOrNull { it.isDefaultRoute && it.gateway is java.net.Inet4Address }
+                    ?.gateway?.hostAddress
+                runOnUiThread {
+                    result.success(mapOf("ip" to (gateway ?: ""), "interface" to (props?.interfaceName ?: "")))
+                }
+            }
+
+            override fun onUnavailable() {
+                runOnUiThread { result.error("WIFI_JOIN_FAILED", "Could not connect to the LinkiSend hotspot", null) }
+            }
+        }
+        wifiNetworkCallback = callback
+        manager.requestNetwork(request, callback)
     }
 
     /// Android 17+ gates local network access behind a runtime permission; older versions grant it implicitly.

@@ -4,6 +4,7 @@ import 'package:linkisend_app/config/theme.dart';
 import 'package:linkisend_app/gen/strings.g.dart';
 import 'package:linkisend_app/model/send_mode.dart';
 import 'package:linkisend_app/pages/device_details_page.dart';
+import 'package:linkisend_app/pages/hotspot_send_page.dart';
 import 'package:linkisend_app/pages/selected_files_page.dart';
 import 'package:linkisend_app/pages/tabs/send_tab_vm.dart';
 import 'package:linkisend_app/pages/troubleshoot_page.dart';
@@ -179,6 +180,13 @@ class SendTab extends StatelessWidget {
                 const SizedBox(width: 10),
                 _ScanButton(
                   ips: vm.localIps,
+                ),
+                Tooltip(
+                  message: 'Сканировать QR точки доступа',
+                  child: CustomIconButton(
+                    onPressed: () async => context.push(() => const HotspotSendPage()),
+                    child: const Icon(Icons.qr_code_scanner),
+                  ),
                 ),
                 Tooltip(
                   message: t.sendTab.manualSending,

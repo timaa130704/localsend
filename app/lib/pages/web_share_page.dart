@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:linkisend_app/config/theme.dart';
@@ -7,6 +9,7 @@ import 'package:linkisend_app/model/state/server/web_share_state.dart';
 import 'package:linkisend_app/provider/local_ip_provider.dart';
 import 'package:linkisend_app/provider/network/server/server_provider.dart';
 import 'package:linkisend_app/provider/settings_provider.dart';
+import 'package:linkisend_app/util/native/channel/android_channel.dart' as android_channel;
 import 'package:linkisend_app/util/native/platform_check.dart';
 import 'package:linkisend_app/util/ui/snackbar.dart';
 import 'package:linkisend_app/widget/dialogs/pin_dialog.dart';
@@ -32,8 +35,9 @@ class WebSharePage extends StatefulWidget {
   /// `null` serves the upload page instead (receive via link).
   final List<CrossFile>? files;
   final bool showQrOnOpen;
+  final bool localHotspot;
 
-  const WebSharePage({this.files, this.showQrOnOpen = false});
+  const WebSharePage({this.files, this.showQrOnOpen = false, this.localHotspot = false});
 
   @override
   State<WebSharePage> createState() => _WebSharePageState();
@@ -44,6 +48,7 @@ class _WebSharePageState extends State<WebSharePage> with Refena {
   bool _encrypted = false;
   String? _initializedError;
   bool _showReceiveQrAfterInit = false;
+  Map<String, String>? _hotspot;
 
   bool get _sendMode => widget.files != null;
 
@@ -65,6 +70,9 @@ class _WebSharePageState extends State<WebSharePage> with Refena {
     await sleepAsync(500);
     try {
       final files = widget.files;
+      if (widget.localHotspot && _hotspot == null) {
+        _hotspot = await android_channel.startLocalHotspotAndroid();
+      }
 
       // The pin of a previous web share session is kept;
       // receive mode initially uses the receive pin from settings.
@@ -114,18 +122,35 @@ class _WebSharePageState extends State<WebSharePage> with Refena {
   /// Web share uses unencrypted http by default, so we need to revert to the previous state.
   Future<void> _revertServerState() async {
     await ref.notifier(serverProvider).restartServerFromSettings();
+    if (_hotspot != null) {
+      await android_channel.stopLocalHotspotAndroid();
+      _hotspot = null;
+    }
   }
 
   Future<void> _showReceiveQr() async {
     final serverState = ref.read(serverProvider);
     final localIps = ref.read(localIpProvider).localIps;
-    if (serverState == null || localIps.isEmpty || !mounted) return;
-    final url = 'http://${localIps.first}:${serverState.port}';
+    if (serverState == null || (_hotspot == null && localIps.isEmpty) || !mounted) return;
+    final url = 'http://${_hotspot?['ip'] ?? localIps.first}:${serverState.port}';
     final pin = serverState.web?.pin;
     final urlWithPin = pin == null ? url : '$url/?pin=${Uri.encodeQueryComponent(pin)}';
+    final qrData = _hotspot == null
+        ? urlWithPin
+        : jsonEncode({
+            'type': 'linkisend-hotspot-v1',
+            'ssid': _hotspot!['ssid'],
+            'password': _hotspot!['password'],
+            'ip': _hotspot!['ip'],
+            'port': serverState.port,
+            'https': _encrypted,
+          });
     await showDialog<void>(
       context: context,
-      builder: (_) => QrDialog(data: urlWithPin, label: url, pin: pin),
+      builder: (_) => QrDialog(
+        data: qrData,
+        label: _hotspot == null ? url : 'Точка Wi‑Fi: ${_hotspot!['ssid']}\nПароль: ${_hotspot!['password']}',
+      ),
     );
   }
 

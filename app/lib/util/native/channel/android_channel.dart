@@ -1,6 +1,8 @@
 import 'package:dart_mappable/dart_mappable.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 part 'android_channel.mapper.dart';
 
@@ -62,6 +64,42 @@ Future<bool> requestLocalNetworkPermissionAndroid() async {
     _logger.warning('Could not request local network permission', e);
     return false;
   }
+}
+
+Future<Map<String, String>> startLocalHotspotAndroid() async {
+  final sdk = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
+  final permission = sdk >= 33 ? Permission.nearbyWifiDevices : Permission.locationWhenInUse;
+  if (!await permission.request().isGranted) {
+    throw PlatformException(code: 'HOTSPOT_PERMISSION_DENIED', message: 'Nearby Wi-Fi permission is required to start a hotspot.');
+  }
+  final result = await _methodChannel.invokeMapMethod<String, dynamic>('startLocalHotspot');
+  if (result == null) throw PlatformException(code: 'HOTSPOT_FAILED', message: 'Android did not return hotspot details.');
+  return result.map((key, value) => MapEntry(key, value?.toString() ?? ''));
+}
+
+Future<void> stopLocalHotspotAndroid() => _methodChannel.invokeMethod('stopLocalHotspot');
+
+Future<Map<String, String>> connectToHotspotAndroid({required String ssid, required String password}) async {
+  final sdk = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
+  final permission = sdk >= 33 ? Permission.nearbyWifiDevices : Permission.locationWhenInUse;
+  if (!await permission.request().isGranted) {
+    throw PlatformException(code: 'WIFI_PERMISSION_DENIED', message: 'Разреши доступ к Wi-Fi устройствам для подключения.');
+  }
+  final result = await _methodChannel.invokeMapMethod<String, dynamic>('connectToHotspot', {'ssid': ssid, 'password': password});
+  if (result == null) throw PlatformException(code: 'WIFI_JOIN_FAILED', message: 'Не удалось подключиться к точке доступа.');
+  return result.map((key, value) => MapEntry(key, value?.toString() ?? ''));
+}
+
+Future<void> disconnectFromHotspotAndroid() => _methodChannel.invokeMethod('disconnectFromHotspot');
+
+Future<List<String>> getNearbyHotspotsAndroid() async {
+  final sdk = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
+  final permission = sdk >= 33 ? Permission.nearbyWifiDevices : Permission.locationWhenInUse;
+  if (!await permission.request().isGranted) {
+    throw PlatformException(code: 'WIFI_PERMISSION_DENIED', message: 'Разреши доступ к Wi-Fi устройствам.');
+  }
+  final result = await _methodChannel.invokeListMethod<String>('getNearbyHotspots');
+  return result ?? const [];
 }
 
 Future<void> openContentUri({

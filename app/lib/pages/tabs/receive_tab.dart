@@ -112,7 +112,7 @@ class _ReceiveTabState extends State<ReceiveTab> {
                             onPressed: serverState == null
                                 ? null
                                 : () async {
-                                    await context.global.dispatchAsync(NavigateAction.push(const WebSharePage(showQrOnOpen: true)));
+                                    await context.global.dispatchAsync(NavigateAction.push(const WebSharePage(showQrOnOpen: true, localHotspot: true)));
                                   },
                             icon: const Icon(Icons.qr_code),
                             label: Text(t.receiveTab.link),
