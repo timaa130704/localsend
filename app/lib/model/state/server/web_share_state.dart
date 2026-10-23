@@ -1,5 +1,5 @@
 import 'package:dart_mappable/dart_mappable.dart';
-import 'package:localsend_app/model/state/send/web/web_download_state.dart';
+import 'package:linkisend_app/model/state/send/web/web_download_state.dart';
 
 part 'web_share_state.mapper.dart';
 

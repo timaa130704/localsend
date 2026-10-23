@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:localsend_app/config/theme.dart';
-import 'package:localsend_app/gen/strings.g.dart';
-import 'package:localsend_app/model/cross_file.dart';
-import 'package:localsend_app/model/state/server/web_share_state.dart';
-import 'package:localsend_app/provider/local_ip_provider.dart';
-import 'package:localsend_app/provider/network/server/server_provider.dart';
-import 'package:localsend_app/provider/settings_provider.dart';
-import 'package:localsend_app/util/native/platform_check.dart';
-import 'package:localsend_app/util/ui/snackbar.dart';
-import 'package:localsend_app/widget/dialogs/pin_dialog.dart';
-import 'package:localsend_app/widget/dialogs/qr_dialog.dart';
-import 'package:localsend_app/widget/dialogs/zoom_dialog.dart';
-import 'package:localsend_app/widget/responsive_list_view.dart';
+import 'package:linkisend_app/config/theme.dart';
+import 'package:linkisend_app/gen/strings.g.dart';
+import 'package:linkisend_app/model/cross_file.dart';
+import 'package:linkisend_app/model/state/server/web_share_state.dart';
+import 'package:linkisend_app/provider/local_ip_provider.dart';
+import 'package:linkisend_app/provider/network/server/server_provider.dart';
+import 'package:linkisend_app/provider/settings_provider.dart';
+import 'package:linkisend_app/util/native/platform_check.dart';
+import 'package:linkisend_app/util/ui/snackbar.dart';
+import 'package:linkisend_app/widget/dialogs/pin_dialog.dart';
+import 'package:linkisend_app/widget/dialogs/qr_dialog.dart';
+import 'package:linkisend_app/widget/dialogs/zoom_dialog.dart';
+import 'package:linkisend_app/widget/responsive_list_view.dart';
 import 'package:localsend_isolates/util/sleep.dart';
 import 'package:logging/logging.dart';
 import 'package:refena_flutter/refena_flutter.dart';
@@ -31,8 +31,9 @@ class WebSharePage extends StatefulWidget {
   /// The files offered for download (share via link).
   /// `null` serves the upload page instead (receive via link).
   final List<CrossFile>? files;
+  final bool showQrOnOpen;
 
-  const WebSharePage({this.files});
+  const WebSharePage({this.files, this.showQrOnOpen = false});
 
   @override
   State<WebSharePage> createState() => _WebSharePageState();
@@ -42,6 +43,7 @@ class _WebSharePageState extends State<WebSharePage> with Refena {
   _ServerState _stateEnum = _ServerState.initializing;
   bool _encrypted = false;
   String? _initializedError;
+  bool _showReceiveQrAfterInit = false;
 
   bool get _sendMode => widget.files != null;
 
@@ -93,6 +95,12 @@ class _WebSharePageState extends State<WebSharePage> with Refena {
       setState(() {
         _stateEnum = _ServerState.running;
       });
+      if (widget.showQrOnOpen && files == null && !_showReceiveQrAfterInit) {
+        _showReceiveQrAfterInit = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showReceiveQr();
+        });
+      }
     } catch (e) {
       if (context.mounted) {
         setState(() {
@@ -106,6 +114,19 @@ class _WebSharePageState extends State<WebSharePage> with Refena {
   /// Web share uses unencrypted http by default, so we need to revert to the previous state.
   Future<void> _revertServerState() async {
     await ref.notifier(serverProvider).restartServerFromSettings();
+  }
+
+  Future<void> _showReceiveQr() async {
+    final serverState = ref.read(serverProvider);
+    final localIps = ref.read(localIpProvider).localIps;
+    if (serverState == null || localIps.isEmpty || !mounted) return;
+    final url = 'http://${localIps.first}:${serverState.port}';
+    final pin = serverState.web?.pin;
+    final urlWithPin = pin == null ? url : '$url/?pin=${Uri.encodeQueryComponent(pin)}';
+    await showDialog<void>(
+      context: context,
+      builder: (_) => QrDialog(data: urlWithPin, label: url, pin: pin),
+    );
   }
 
   @override

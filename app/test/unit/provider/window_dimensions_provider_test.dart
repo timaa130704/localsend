@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:localsend_app/provider/window_dimensions_provider.dart';
+import 'package:linkisend_app/provider/window_dimensions_provider.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../mocks.mocks.dart';

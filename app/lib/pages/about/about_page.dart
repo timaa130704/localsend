@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:localsend_app/gen/strings.g.dart';
-import 'package:localsend_app/pages/debug/debug_page.dart';
-import 'package:localsend_app/util/i18n.dart';
-import 'package:localsend_app/widget/local_send_logo.dart';
-import 'package:localsend_app/widget/responsive_list_view.dart';
+import 'package:linkisend_app/gen/strings.g.dart';
+import 'package:linkisend_app/pages/debug/debug_page.dart';
+import 'package:linkisend_app/util/i18n.dart';
+import 'package:linkisend_app/widget/local_send_logo.dart';
+import 'package:linkisend_app/widget/responsive_list_view.dart';
 import 'package:routerino/routerino.dart';
 import 'package:url_launcher/url_launcher.dart';
 

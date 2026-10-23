@@ -1,6 +1,6 @@
-name: localsend_app
-description: An open source cross-platform alternative to AirDrop
-homepage: https://localsend.org/
+name: linkisend_app
+description: Share files with LinkiSend
+homepage: https://github.com/timaa130704/localsend
 publish_to: "none"
 resolution: workspace
 

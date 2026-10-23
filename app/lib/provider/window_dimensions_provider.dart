@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
-import 'package:localsend_app/provider/persistence_provider.dart';
-import 'package:localsend_app/util/native/macos_channel.dart' as macos_channel;
+import 'package:linkisend_app/provider/persistence_provider.dart';
+import 'package:linkisend_app/util/native/macos_channel.dart' as macos_channel;
 import 'package:refena_flutter/refena_flutter.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';

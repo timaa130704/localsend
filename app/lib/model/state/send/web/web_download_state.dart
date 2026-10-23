@@ -1,6 +1,6 @@
 import 'package:dart_mappable/dart_mappable.dart';
-import 'package:localsend_app/model/state/send/web/web_download_file.dart';
-import 'package:localsend_app/model/state/send/web/web_download_session.dart';
+import 'package:linkisend_app/model/state/send/web/web_download_file.dart';
+import 'package:linkisend_app/model/state/send/web/web_download_session.dart';
 
 part 'web_download_state.mapper.dart';
 

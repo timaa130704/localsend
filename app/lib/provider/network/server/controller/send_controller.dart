@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:localsend_app/model/cross_file.dart';
-import 'package:localsend_app/model/state/send/web/web_download_file.dart';
-import 'package:localsend_app/model/state/send/web/web_download_session.dart';
-import 'package:localsend_app/model/state/send/web/web_download_state.dart';
-import 'package:localsend_app/provider/network/server/server_utils.dart';
-import 'package:localsend_app/provider/settings_provider.dart';
-import 'package:localsend_app/util/native/directories.dart';
-import 'package:localsend_app/util/user_agent_analyzer.dart';
+import 'package:linkisend_app/model/cross_file.dart';
+import 'package:linkisend_app/model/state/send/web/web_download_file.dart';
+import 'package:linkisend_app/model/state/send/web/web_download_session.dart';
+import 'package:linkisend_app/model/state/send/web/web_download_state.dart';
+import 'package:linkisend_app/provider/network/server/server_utils.dart';
+import 'package:linkisend_app/provider/settings_provider.dart';
+import 'package:linkisend_app/util/native/directories.dart';
+import 'package:linkisend_app/util/user_agent_analyzer.dart';
 import 'package:localsend_isolates/isolate.dart';
 import 'package:localsend_isolates/model/dto/file_dto.dart';
 import 'package:localsend_isolates/model/file_type.dart';

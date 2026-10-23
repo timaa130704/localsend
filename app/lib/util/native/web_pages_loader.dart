@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:localsend_app/util/native/platform_check.dart';
+import 'package:linkisend_app/util/native/platform_check.dart';
 import 'package:localsend_isolates/rust/api/server.dart' show WebPages;
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;

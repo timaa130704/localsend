@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:localsend_app/gen/strings.g.dart';
+import 'package:linkisend_app/gen/strings.g.dart';
 import 'package:system_date_time_format/system_date_time_format.dart';
 
 // TODO: Revisit this plugin when https://github.com/dart-lang/i18n/issues/67 is fixed.

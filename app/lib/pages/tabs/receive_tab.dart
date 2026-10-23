@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:localsend_app/gen/strings.g.dart';
-import 'package:localsend_app/model/state/server/server_state.dart';
-import 'package:localsend_app/pages/home_page.dart';
-import 'package:localsend_app/pages/home_page_controller.dart';
-import 'package:localsend_app/pages/receive_history_page.dart';
-import 'package:localsend_app/pages/web_share_page.dart';
-import 'package:localsend_app/provider/animation_provider.dart';
-import 'package:localsend_app/provider/local_ip_provider.dart';
-import 'package:localsend_app/provider/network/server/server_provider.dart';
-import 'package:localsend_app/provider/settings_provider.dart';
-import 'package:localsend_app/util/ip_helper.dart';
-import 'package:localsend_app/widget/animations/initial_fade_transition.dart';
-import 'package:localsend_app/widget/column_list_view.dart';
-import 'package:localsend_app/widget/custom_icon_button.dart';
-import 'package:localsend_app/widget/local_send_logo.dart';
-import 'package:localsend_app/widget/responsive_list_view.dart';
-import 'package:localsend_app/widget/rotating_widget.dart';
+import 'package:linkisend_app/gen/strings.g.dart';
+import 'package:linkisend_app/model/state/server/server_state.dart';
+import 'package:linkisend_app/pages/home_page.dart';
+import 'package:linkisend_app/pages/home_page_controller.dart';
+import 'package:linkisend_app/pages/receive_history_page.dart';
+import 'package:linkisend_app/pages/web_share_page.dart';
+import 'package:linkisend_app/provider/animation_provider.dart';
+import 'package:linkisend_app/provider/local_ip_provider.dart';
+import 'package:linkisend_app/provider/network/server/server_provider.dart';
+import 'package:linkisend_app/provider/settings_provider.dart';
+import 'package:linkisend_app/util/ip_helper.dart';
+import 'package:linkisend_app/widget/animations/initial_fade_transition.dart';
+import 'package:linkisend_app/widget/column_list_view.dart';
+import 'package:linkisend_app/widget/custom_icon_button.dart';
+import 'package:linkisend_app/widget/local_send_logo.dart';
+import 'package:linkisend_app/widget/responsive_list_view.dart';
+import 'package:linkisend_app/widget/rotating_widget.dart';
 import 'package:localsend_isolates/util/sleep.dart';
 import 'package:refena_flutter/addons.dart';
 import 'package:refena_flutter/refena_flutter.dart';
@@ -105,12 +105,19 @@ class _ReceiveTabState extends State<ReceiveTab> {
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: Center(
-                      child: OutlinedButton.icon(
-                        onPressed: () async {
-                          await context.global.dispatchAsync(NavigateAction.push(const WebSharePage()));
-                        },
-                        icon: Icon(Icons.language),
-                        label: Text(t.receiveTab.link),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: serverState == null
+                                ? null
+                                : () async {
+                                    await context.global.dispatchAsync(NavigateAction.push(const WebSharePage(showQrOnOpen: true)));
+                                  },
+                            icon: const Icon(Icons.qr_code),
+                            label: Text(t.receiveTab.link),
+                          ),
+                        ],
                       ),
                     ),
                   ),

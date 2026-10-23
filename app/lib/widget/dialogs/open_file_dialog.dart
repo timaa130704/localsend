@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:localsend_app/gen/strings.g.dart';
-import 'package:localsend_app/util/native/channel/android_channel.dart' as android_channel;
-import 'package:localsend_app/util/native/open_file.dart';
-import 'package:localsend_app/util/native/open_folder.dart';
+import 'package:linkisend_app/gen/strings.g.dart';
+import 'package:linkisend_app/util/native/channel/android_channel.dart' as android_channel;
+import 'package:linkisend_app/util/native/open_file.dart';
+import 'package:linkisend_app/util/native/open_folder.dart';
 import 'package:localsend_isolates/model/file_type.dart';
 import 'package:path/path.dart' as path;
 import 'package:routerino/routerino.dart';

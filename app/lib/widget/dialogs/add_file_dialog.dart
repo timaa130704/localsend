@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:localsend_app/gen/strings.g.dart';
-import 'package:localsend_app/util/native/file_picker.dart';
-import 'package:localsend_app/util/native/platform_check.dart';
-import 'package:localsend_app/widget/big_button.dart';
-import 'package:localsend_app/widget/dialogs/custom_bottom_sheet.dart';
+import 'package:linkisend_app/gen/strings.g.dart';
+import 'package:linkisend_app/util/native/file_picker.dart';
+import 'package:linkisend_app/util/native/platform_check.dart';
+import 'package:linkisend_app/widget/big_button.dart';
+import 'package:linkisend_app/widget/dialogs/custom_bottom_sheet.dart';
 import 'package:refena_flutter/addons.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 import 'package:routerino/routerino.dart';

@@ -2,8 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:localsend_app/gen/strings.g.dart';
-import 'package:localsend_app/util/system_date_time_formatter.dart';
+import 'package:linkisend_app/gen/strings.g.dart';
+import 'package:linkisend_app/util/system_date_time_formatter.dart';
 import 'package:system_date_time_format/system_date_time_format.dart';
 
 void main() {

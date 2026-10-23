@@ -1,4 +1,4 @@
-package org.localsend.localsend_app
+package org.linkisend.linkisend_app
 
 import android.content.ContentResolver
 import android.content.Context

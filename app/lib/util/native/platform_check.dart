@@ -2,7 +2,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-const _platformChannel = MethodChannel('org.localsend.localsend_app/platform');
+const _platformChannel = MethodChannel('org.linkisend.linkisend_app/platform');
 bool _isWayland = Platform.environment['XDG_SESSION_TYPE'] == 'wayland';
 
 Future<bool> isWaylandDisplay() async {

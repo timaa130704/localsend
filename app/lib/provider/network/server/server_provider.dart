@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:localsend_app/gen/strings.g.dart';
-import 'package:localsend_app/model/cross_file.dart';
-import 'package:localsend_app/model/state/server/server_state.dart';
-import 'package:localsend_app/model/state/server/web_share_state.dart';
-import 'package:localsend_app/provider/network/server/controller/receive_controller.dart';
-import 'package:localsend_app/provider/network/server/controller/send_controller.dart';
-import 'package:localsend_app/provider/network/server/server_utils.dart';
-import 'package:localsend_app/provider/settings_provider.dart';
-import 'package:localsend_app/util/alias_generator.dart';
-import 'package:localsend_app/util/native/web_pages_loader.dart';
+import 'package:linkisend_app/gen/strings.g.dart';
+import 'package:linkisend_app/model/cross_file.dart';
+import 'package:linkisend_app/model/state/server/server_state.dart';
+import 'package:linkisend_app/model/state/server/web_share_state.dart';
+import 'package:linkisend_app/provider/network/server/controller/receive_controller.dart';
+import 'package:linkisend_app/provider/network/server/controller/send_controller.dart';
+import 'package:linkisend_app/provider/network/server/server_utils.dart';
+import 'package:linkisend_app/provider/settings_provider.dart';
+import 'package:linkisend_app/util/alias_generator.dart';
+import 'package:linkisend_app/util/native/web_pages_loader.dart';
 import 'package:localsend_isolates/constants.dart';
 import 'package:localsend_isolates/isolate.dart';
 import 'package:localsend_isolates/model/dto/multicast_dto.dart';

@@ -1,7 +1,7 @@
 import 'dart:io' show Directory, FileSystemException, Platform;
 
 import 'package:flutter/foundation.dart';
-import 'package:localsend_app/util/native/channel/android_channel.dart';
+import 'package:linkisend_app/util/native/channel/android_channel.dart';
 import 'package:path_provider/path_provider.dart' as path;
 
 Future<String> getDefaultDestinationDirectory() async {

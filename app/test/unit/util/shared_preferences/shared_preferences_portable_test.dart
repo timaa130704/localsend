@@ -1,4 +1,4 @@
-import 'package:localsend_app/util/shared_preferences/shared_preferences_portable.dart';
+import 'package:linkisend_app/util/shared_preferences/shared_preferences_portable.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 

@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:localsend_app/gen/assets.gen.dart';
-import 'package:localsend_app/gen/strings.g.dart';
-import 'package:localsend_app/provider/animation_provider.dart';
-import 'package:localsend_app/util/native/platform_check.dart';
+import 'package:linkisend_app/gen/assets.gen.dart';
+import 'package:linkisend_app/gen/strings.g.dart';
+import 'package:linkisend_app/provider/animation_provider.dart';
+import 'package:linkisend_app/util/native/platform_check.dart';
 import 'package:logging/logging.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 import 'package:tray_manager/tray_manager.dart' as tm;

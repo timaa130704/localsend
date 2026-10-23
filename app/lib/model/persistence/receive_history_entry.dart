@@ -1,6 +1,6 @@
 import 'package:dart_mappable/dart_mappable.dart';
 import 'package:flutter/widgets.dart';
-import 'package:localsend_app/util/system_date_time_formatter.dart';
+import 'package:linkisend_app/util/system_date_time_formatter.dart';
 import 'package:localsend_isolates/model/file_type.dart';
 
 part 'receive_history_entry.mapper.dart';

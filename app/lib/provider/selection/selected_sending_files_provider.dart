@@ -2,11 +2,11 @@ import 'dart:convert' show jsonDecode, utf8;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:localsend_app/model/cross_file.dart';
-import 'package:localsend_app/util/native/cache_helper.dart';
-import 'package:localsend_app/util/native/channel/android_channel.dart' as android_channel;
-import 'package:localsend_app/util/native/cross_file_converters.dart';
-import 'package:localsend_app/util/send_ignore.dart';
+import 'package:linkisend_app/model/cross_file.dart';
+import 'package:linkisend_app/util/native/cache_helper.dart';
+import 'package:linkisend_app/util/native/channel/android_channel.dart' as android_channel;
+import 'package:linkisend_app/util/native/cross_file_converters.dart';
+import 'package:linkisend_app/util/send_ignore.dart';
 import 'package:localsend_isolates/model/file_type.dart';
 import 'package:localsend_isolates/rust/api/metadata.dart';
 import 'package:localsend_isolates/util/content_uri_helper.dart';
