@@ -7,6 +7,7 @@ on:
 env:
   FLUTTER_VERSION: "3.41.9"
   APK_BUILD_DIR: "/tmp/build"
+  HAS_ANDROID_SIGNING: ${{ secrets.ANDROID_KEY_PROPERTIES != '' && secrets.ANDROID_KEY_STORE != '' }}
 
 jobs:
   build:
@@ -40,7 +41,7 @@ jobs:
           cp -r . $APK_BUILD_DIR
 
       - name: Decode signing files (when configured)
-        if: ${{ secrets.ANDROID_KEY_PROPERTIES != '' && secrets.ANDROID_KEY_STORE != '' }}
+        if: ${{ env.HAS_ANDROID_SIGNING == 'true' }}
         working-directory: ${{ env.APK_BUILD_DIR }}
         env:
           ENCODED_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
